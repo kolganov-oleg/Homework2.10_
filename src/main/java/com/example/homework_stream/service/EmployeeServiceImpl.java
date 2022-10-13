@@ -2,7 +2,9 @@ package com.example.homework_stream.service;
 
 import com.example.homework_stream.exeption.EmployeeAlreadyAddedException;
 import com.example.homework_stream.exeption.EmployeeNotFoundException;
+import com.example.homework_stream.exeption.IncorrectInputException;
 import com.example.homework_stream.model.Employee;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +21,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee add(String firstName, String lastName, int salary, int department) {
+        checkUserName(firstName, lastName);
         Employee employee = new Employee(firstName, lastName, salary, department);
         if (employees.contains(employee)) {
             throw new EmployeeAlreadyAddedException();
@@ -29,6 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee remove(String firstName, String lastName) {
+        checkUserName(firstName, lastName);
         Employee employee = find(firstName, lastName);
         employees.remove(employee);
 
@@ -37,6 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee find(String firstName, String lastName) {
+        checkUserName(firstName, lastName);
         Optional<Employee> employee = employees.stream()
                 .filter(e -> e.getFirstName().equals(firstName) && e.getLastName().equals(lastName))
                 .findAny();
@@ -63,7 +68,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<Employee> getAllEmployeeInDepartment(int department) {
-        return  employees.stream()
+        return employees.stream()
                 .filter(e -> e.getDepartment() == department)
                 .collect(Collectors.toList());
 
@@ -82,6 +87,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         return Collections.unmodifiableCollection(employees);
     }
 
+    private void checkUserName(String firstName, String lastName) {
+        if (!StringUtils.isAlpha(firstName) && StringUtils.isAlpha(lastName)) {
+            throw new IncorrectInputException();
+        }
+    }
 
 
     public List<Employee> getEmployees() {
